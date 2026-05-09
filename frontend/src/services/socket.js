@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client';
-const SOCKET_URL = 'http://localhost:5000';
+const SOCKET_URL = 'https://ev-power-station.onrender.com';
 let socket = null;
 
 export const getSocket = () => {
