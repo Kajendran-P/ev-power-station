@@ -8,7 +8,7 @@ import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter basename="/Ev-power-station">
+    <BrowserRouter>
       <AuthProvider>
         <NotifProvider>
           <App />

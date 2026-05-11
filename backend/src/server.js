@@ -1,13 +1,10 @@
 const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
 const cors = require('cors');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
 const path = require('path');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
-const socketHandler = require('./utils/socketHandler');
 const { seedDB } = require('./config/seed');
 
 // Load env vars
@@ -17,9 +14,11 @@ dotenv.config();
 connectDB();
 
 const app = express();
-const server = http.createServer(app);
 
-// Socket.IO
+// Trust proxy (required for Vercel + rate limiting)
+app.set('trust proxy', 1);
+
+// CORS configuration
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
@@ -27,34 +26,33 @@ const allowedOrigins = [
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-  }
-});
-
-// Make io accessible to routes
-app.set('io', io);
-
-// Socket handler
-socketHandler(io);
-
-// Middleware
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Allow all origins in production for now
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Security middleware
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 
-// Serve uploaded files
-const uploadsDir = path.join(__dirname, '../uploads');
-const fs = require('fs');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-if (!fs.existsSync(path.join(uploadsDir, 'invoices'))) fs.mkdirSync(path.join(uploadsDir, 'invoices'), { recursive: true });
-app.use('/uploads', express.static(uploadsDir));
+// Serve uploaded files (for local dev — Vercel has read-only fs)
+if (process.env.NODE_ENV !== 'production') {
+  const fs = require('fs');
+  const uploadsDir = path.join(__dirname, '../uploads');
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+  if (!fs.existsSync(path.join(uploadsDir, 'invoices'))) fs.mkdirSync(path.join(uploadsDir, 'invoices'), { recursive: true });
+  app.use('/uploads', express.static(uploadsDir));
+}
 
 // Routes
 app.get('/', (req, res) => res.json({ message: 'VoltReserve Backend API is running', version: '2.0.0' }));
@@ -86,7 +84,13 @@ app.use(errorHandler);
 // Seed database on first run
 seedDB().catch(console.error);
 
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`⚡ VoltReserve Backend running on port ${PORT}`);
-});
+// For local development: start server
+// In production (Vercel), the app is exported and handled by serverless
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`⚡ VoltReserve Backend running on port ${PORT}`);
+  });
+}
+
+module.exports = app;
