@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://ev-power-station.onrender.com';
+
 const API = axios.create({
-  baseURL: 'https://ev-power-station.onrender.com/api',
+  baseURL: `${BASE_URL}/api`,
   headers: { 'Content-Type': 'application/json' }
 });
 
