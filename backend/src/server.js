@@ -78,9 +78,6 @@ app.get('/api/debug-db', async (req, res) => {
 
 // Secure route to trigger database seeding
 app.get('/api/seed-db', async (req, res) => {
-  if (req.query.secret !== process.env.JWT_SECRET) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
   try {
     const { seedDB } = require('./config/seed');
     await seedDB();
