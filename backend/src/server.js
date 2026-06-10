@@ -76,6 +76,21 @@ app.get('/api/debug-db', async (req, res) => {
   }
 });
 
+// Secure route to trigger database seeding
+app.get('/api/seed-db', async (req, res) => {
+  if (req.query.secret !== process.env.JWT_SECRET) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  try {
+    const { seedDB } = require('./config/seed');
+    await seedDB();
+    res.json({ success: true, message: 'Production database seeded successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+
 // ══════════════════════════════════════════════════════════
 // DB MIDDLEWARE: Every /api/* route below this AWAITS DB
 // ══════════════════════════════════════════════════════════
