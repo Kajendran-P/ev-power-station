@@ -629,8 +629,95 @@ select.inp{appearance:none;cursor:pointer}
   .sos-status-hz::before{display:none}
 }
 
+/* Responsive visibility utilities */
+.visible-mobile { display: none !important; }
+.hidden-mobile { display: inline !important; }
+.nav-menu-btn { display: none !important; }
+.mobile-logout-btn { display: none !important; }
+
+@keyframes slideDownMobileMenu {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media(max-width:768px){
-  .nav-lks{display:none}
+  .visible-mobile { display: inline !important; }
+  .hidden-mobile { display: none !important; }
+  
+  .nav-menu-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--fg2);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .nav-menu-btn:hover {
+    border-color: var(--border2);
+    color: var(--accent);
+  }
+
+  .nav-logout-btn {
+    display: none !important;
+  }
+  
+  .mobile-logout-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+    width: 100% !important;
+  }
+  
+  /* Hide standard menu links on mobile by default */
+  .nav-lks {
+    display: none !important;
+  }
+  
+  /* Drawer overlay layout for open menu */
+  .nav-lks.mobile-open {
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    top: var(--nav-h) !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(6, 12, 10, 0.98) !important;
+    backdrop-filter: blur(24px) !important;
+    padding: 30px 24px !important;
+    gap: 12px !important;
+    z-index: 998 !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    border-top: 1px solid var(--border) !important;
+    animation: slideDownMobileMenu 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  
+  .nav-lks.mobile-open .nav-lk {
+    width: 100% !important;
+    font-size: 16px !important;
+    padding: 14px 20px !important;
+    border-radius: 10px !important;
+    border: 1px solid transparent !important;
+    background: rgba(255, 255, 255, 0.01) !important;
+    transition: all 0.25s !important;
+  }
+  
+  .nav-lks.mobile-open .nav-lk:hover,
+  .nav-lks.mobile-open .nav-lk.act {
+    background: var(--glass) !important;
+    color: var(--accent) !important;
+    border-color: var(--border) !important;
+    box-shadow: 0 0 15px rgba(0, 245, 130, 0.04) !important;
+  }
+
   .hero-t{font-size:32px}
   .sgrid{grid-template-columns:1fr}
   .stats-g{grid-template-columns:repeat(2,1fr)}
@@ -645,6 +732,12 @@ select.inp{appearance:none;cursor:pointer}
   .filter-bar select.inp{max-width:100%}
 }
 @media(max-width:480px){
+  .nav-user-info {
+    display: none !important;
+  }
+  .nav-user-pill {
+    padding: 6px !important;
+  }
   .stats-g{grid-template-columns:1fr}
 }
 
